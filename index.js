@@ -1,19 +1,30 @@
-module.exports = function(query, callback, params) {
+module.exports = function(selector, callback, params) {
   return new Promise(resolve => {
     if (typeof params === 'boolean') {
       params = {
-        init: params,
+        existing: params,
       };
     }
 
+    params.existing ??= true;
+    params.root ??= window.document;
+
+    let arrived = false;
+
     const arriving = element => {
+      if (!arrived) {
+        arrived = true;
+      } else if (params.once) {
+        return;
+      }
+
       resolve(element);
       callback && callback(element);
     };
 
     const start = () => {
       setTimeout(() => {
-        document.addEventListener('DOMNodeInserted', event => {
+        params.root.addEventListener('DOMNodeInserted', event => {
           setTimeout(() => {
             if (event.target) {
               if (event.target.matches && event.target.matches(selector)) {
@@ -29,8 +40,8 @@ module.exports = function(query, callback, params) {
           });
         });
 
-        if (existing) {
-          document.querySelectorAll(selector).forEach(element => {
+        if (params.existing) {
+          params.root.querySelectorAll(selector).forEach(element => {
             arriving(element);
           });
         }
