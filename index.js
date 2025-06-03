@@ -6,6 +6,8 @@ module.exports = function(selector, callback, params) {
       };
     }
 
+    params ??= {};
+
     params.existing ??= true;
     params.root ??= window.document;
 
