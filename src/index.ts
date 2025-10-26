@@ -106,30 +106,6 @@ export function detect<T extends Element = Element>(
 }
 
 /**
- * Polyfill for AbortSignal.any() that combines multiple signals
- */
-function combineAbortSignals(signals: AbortSignal[]): AbortSignal {
-	// If AbortSignal.any is available, use it
-	if (typeof AbortSignal.any === "function") {
-		return AbortSignal.any(signals);
-	}
-
-	// Otherwise, create a polyfill
-	const controller = new AbortController();
-
-	for (const signal of signals) {
-		if (signal.aborted) {
-			controller.abort();
-			break;
-		}
-
-		signal.addEventListener("abort", () => controller.abort(), { once: true });
-	}
-
-	return controller.signal;
-}
-
-/**
  * Internal implementation of detect
  */
 function detectImpl<T extends Element = Element>(
@@ -156,7 +132,7 @@ function detectImpl<T extends Element = Element>(
 		const timeoutId = setTimeout(() => timeoutController.abort(), timeout);
 
 		// Combine all signals
-		combinedSignal = combineAbortSignals([
+		combinedSignal = AbortSignal.any([
 			externalSignal,
 			internalController.signal,
 			timeoutController.signal,
@@ -167,14 +143,14 @@ function detectImpl<T extends Element = Element>(
 			once: true,
 		});
 	} else if (externalSignal) {
-		combinedSignal = combineAbortSignals([
+		combinedSignal = AbortSignal.any([
 			externalSignal,
 			internalController.signal,
 		]);
 	} else if (timeout) {
 		const timeoutController = new AbortController();
 		const timeoutId = setTimeout(() => timeoutController.abort(), timeout);
-		combinedSignal = combineAbortSignals([
+		combinedSignal = AbortSignal.any([
 			internalController.signal,
 			timeoutController.signal,
 		]);

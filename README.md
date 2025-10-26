@@ -242,4 +242,5 @@ Requires:
 
 - [MutationObserver](https://caniuse.com/mutationobserver)
 - [AbortController](https://caniuse.com/abortcontroller)
+- [AbortSignal.any()](https://caniuse.com/mdn-api_abortsignal_any_static)
 - [Promises](https://caniuse.com/promises)
