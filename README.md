@@ -6,9 +6,45 @@ Uses [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/Mutatio
 
 ## Installation
 
+### For Bundlers
+
 ```bash
 npm install element-detector
 ```
+
+### For Userscripts
+
+Add the library via `@require` in your userscript metadata:
+
+```javascript
+// ==UserScript==
+// @name         My Userscript
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  Example userscript using element-detector
+// @require      https://cdn.jsdelivr.net/npm/element-detector/dist/index.global.min.js
+// @grant        none
+// ==/UserScript==
+
+(function () {
+  'use strict';
+
+  // Library is available as window.ElementDetector
+  const {detect} = window.ElementDetector;
+
+  // Now you can use detect() in your script
+  detect('.some-element', (element) => {
+    console.log('Element found:', element);
+  });
+})();
+```
+
+Alternative CDN links:
+
+- jsDelivr (minified): `https://cdn.jsdelivr.net/npm/element-detector/dist/index.global.min.js`
+- jsDelivr (unminified): `https://cdn.jsdelivr.net/npm/element-detector/dist/index.global.js`
+- unpkg (minified): `https://unpkg.com/element-detector/dist/index.global.min.js`
+- unpkg (unminified): `https://unpkg.com/element-detector/dist/index.global.js`
 
 ## Usage
 

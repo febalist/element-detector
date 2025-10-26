@@ -10,7 +10,9 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./dist/index.global.js": "./dist/index.global.js",
+    "./dist/index.global.min.js": "./dist/index.global.min.js"
   },
   "files": [
     "dist"
