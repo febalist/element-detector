@@ -251,4 +251,36 @@ describe("detect", () => {
 		await new Promise((resolve) => setTimeout(resolve, 50));
 		expect(callback).toHaveBeenCalledWith(a);
 	});
+
+	it("should reject promise on timeout", async () => {
+		const promise = detect<HTMLButtonElement>("button.test", {
+			timeout: 100,
+		});
+
+		await expect(promise).rejects.toThrow("Detection aborted");
+	});
+
+	it("should reject promise on external abort", async () => {
+		const controller = new AbortController();
+		const promise = detect<HTMLButtonElement>("button.test", {
+			signal: controller.signal,
+		});
+
+		controller.abort();
+
+		await expect(promise).rejects.toThrow("Detection aborted");
+	});
+
+	it("should reject promise with combined signal and timeout", async () => {
+		const controller = new AbortController();
+		const promise = detect<HTMLButtonElement>("button.test", {
+			signal: controller.signal,
+			timeout: 1000,
+		});
+
+		// Abort via external controller before timeout
+		controller.abort();
+
+		await expect(promise).rejects.toThrow("Detection aborted");
+	});
 });

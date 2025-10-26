@@ -78,7 +78,7 @@ export function detect<T extends Element = Element>(
 	// Promise API - no callback provided
 	if (!hasCallback) {
 		return new Promise<T>((resolve, reject) => {
-			const _detector = detectImpl<T>(
+			const detector = detectImpl<T>(
 				selector,
 				(element) => {
 					resolve(element);
@@ -86,16 +86,14 @@ export function detect<T extends Element = Element>(
 				finalOptions,
 			);
 
-			// Reject on abort if signal was provided
-			if (finalOptions.signal) {
-				finalOptions.signal.addEventListener(
-					"abort",
-					() => {
-						reject(new Error("Detection aborted"));
-					},
-					{ once: true },
-				);
-			}
+			// Reject on abort (from any source: external signal, timeout, or internal)
+			detector.signal.addEventListener(
+				"abort",
+				() => {
+					reject(new Error("Detection aborted"));
+				},
+				{ once: true },
+			);
 		});
 	}
 
