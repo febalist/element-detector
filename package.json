@@ -1,6 +1,6 @@
 {
   "name": "element-detector",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Detect elements appearing in the DOM using MutationObserver",
   "type": "module",
   "main": "./dist/index.js",
