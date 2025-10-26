@@ -55,7 +55,7 @@ console.log('Modal appeared:', modal);
 #### Returns
 
 - `ArriveWatcher` - when callback is provided
-- `Promise<T>` - when callback is omitted (defaults to `{ existing: true, once: true }`)
+- `Promise<T>` - when callback is omitted (defaults to `{ once: true }`)
 
 ### Options
 

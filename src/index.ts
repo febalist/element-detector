@@ -46,24 +46,24 @@ export interface ArriveWatcher {
 }
 
 // Function overloads
-export function arrive<T extends Element = Element>(
-  selector: string,
-  callback: (element: T) => void,
-  options?: ArriveOptions<T>
+export function arrive<T extends Element = Element> (
+    selector: string,
+    callback: (element: T) => void,
+    options?: ArriveOptions<T>,
 ): ArriveWatcher;
 
-export function arrive<T extends Element = Element>(
-  selector: string,
-  options?: Omit<ArriveOptions<T>, 'once'>
+export function arrive<T extends Element = Element> (
+    selector: string,
+    options?: Omit<ArriveOptions<T>, 'once'>,
 ): Promise<T>;
 
 /**
  * Watch for elements matching a selector to appear in the DOM
  */
-export function arrive<T extends Element = Element>(
-  selector: string,
-  callbackOrOptions?: ((element: T) => void) | Omit<ArriveOptions<T>, 'once'>,
-  optionsParam?: ArriveOptions<T>
+export function arrive<T extends Element = Element> (
+    selector: string,
+    callbackOrOptions?: ((element: T) => void) | Omit<ArriveOptions<T>, 'once'>,
+    optionsParam?: ArriveOptions<T>,
 ): ArriveWatcher | Promise<T> {
   // Determine if callback was provided
   const hasCallback = typeof callbackOrOptions === 'function';
@@ -72,25 +72,25 @@ export function arrive<T extends Element = Element>(
 
   // For Promise API, set defaults
   const finalOptions: ArriveOptions<T> = hasCallback
-    ? { existing: false, once: false, ...options }
-    : { existing: true, once: true, ...options };
+      ? {once: false, ...options}
+      : {once: true, ...options};
 
   // Promise API - no callback provided
   if (!hasCallback) {
     return new Promise<T>((resolve, reject) => {
       const watcher = arriveImpl<T>(
-        selector,
-        (element) => {
-          resolve(element);
-        },
-        finalOptions
+          selector,
+          (element) => {
+            resolve(element);
+          },
+          finalOptions,
       );
 
       // Reject on abort if signal was provided
       if (finalOptions.signal) {
         finalOptions.signal.addEventListener('abort', () => {
           reject(new Error('Arrive aborted'));
-        }, { once: true });
+        }, {once: true});
       }
     });
   }
@@ -102,7 +102,7 @@ export function arrive<T extends Element = Element>(
 /**
  * Polyfill for AbortSignal.any() that combines multiple signals
  */
-function combineAbortSignals(signals: AbortSignal[]): AbortSignal {
+function combineAbortSignals (signals: AbortSignal[]): AbortSignal {
   // If AbortSignal.any is available, use it
   if (typeof AbortSignal.any === 'function') {
     return AbortSignal.any(signals);
@@ -117,7 +117,7 @@ function combineAbortSignals(signals: AbortSignal[]): AbortSignal {
       break;
     }
 
-    signal.addEventListener('abort', () => controller.abort(), { once: true });
+    signal.addEventListener('abort', () => controller.abort(), {once: true});
   }
 
   return controller.signal;
@@ -126,10 +126,10 @@ function combineAbortSignals(signals: AbortSignal[]): AbortSignal {
 /**
  * Internal implementation of arrive
  */
-function arriveImpl<T extends Element = Element>(
-  selector: string,
-  callback: (element: T) => void,
-  options: ArriveOptions<T> = {}
+function arriveImpl<T extends Element = Element> (
+    selector: string,
+    callback: (element: T) => void,
+    options: ArriveOptions<T> = {},
 ): ArriveWatcher {
   const {
     existing = false,
@@ -157,14 +157,14 @@ function arriveImpl<T extends Element = Element>(
     ]);
 
     // Clear timeout when any signal aborts
-    combinedSignal.addEventListener('abort', () => clearTimeout(timeoutId), { once: true });
+    combinedSignal.addEventListener('abort', () => clearTimeout(timeoutId), {once: true});
   } else if (externalSignal) {
     combinedSignal = combineAbortSignals([externalSignal, internalController.signal]);
   } else if (timeout) {
     const timeoutController = new AbortController();
     const timeoutId = setTimeout(() => timeoutController.abort(), timeout);
     combinedSignal = combineAbortSignals([internalController.signal, timeoutController.signal]);
-    combinedSignal.addEventListener('abort', () => clearTimeout(timeoutId), { once: true });
+    combinedSignal.addEventListener('abort', () => clearTimeout(timeoutId), {once: true});
   } else {
     combinedSignal = internalController.signal;
   }
@@ -201,21 +201,21 @@ function arriveImpl<T extends Element = Element>(
   };
 
   // Handle abort
-  combinedSignal.addEventListener('abort', stop, { once: true });
+  combinedSignal.addEventListener('abort', stop, {once: true});
 
   // Process existing elements if requested
   if (existing) {
     const existingElements = document.querySelectorAll<T>(selector);
     for (const element of existingElements) {
       if (processElement(element)) {
-        return { signal: combinedSignal, stop };
+        return {signal: combinedSignal, stop};
       }
     }
   }
 
   // Don't start observer if already aborted
   if (combinedSignal.aborted) {
-    return { signal: combinedSignal, stop };
+    return {signal: combinedSignal, stop};
   }
 
   // Create MutationObserver to watch for new elements
@@ -256,5 +256,5 @@ function arriveImpl<T extends Element = Element>(
     subtree: true,
   });
 
-  return { signal: combinedSignal, stop };
+  return {signal: combinedSignal, stop};
 }

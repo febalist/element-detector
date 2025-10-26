@@ -167,6 +167,25 @@ describe('arrive', () => {
     expect(element.className).toBe('test');
   });
 
+  it('should not return existing element in promise mode by default', async () => {
+    const button = document.createElement('button');
+    button.className = 'test';
+    document.body.appendChild(button);
+
+    const promise = arrive<HTMLButtonElement>('button.test');
+
+    // Add a new element after a delay
+    setTimeout(() => {
+      const newButton = document.createElement('button');
+      newButton.className = 'test';
+      newButton.id = 'new-button';
+      document.body.appendChild(newButton);
+    }, 50);
+
+    const element = await promise;
+    expect(element.id).toBe('new-button');
+  });
+
   it('should return existing element in promise mode with existing option', async () => {
     const button = document.createElement('button');
     button.className = 'test';
