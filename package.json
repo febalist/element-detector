@@ -1,7 +1,7 @@
 {
-	"name": "@febalist/arrive",
+	"name": "element-detector",
 	"version": "1.0.0",
-	"description": "Watch for elements appearing in the DOM using MutationObserver",
+	"description": "Detect elements appearing in the DOM using MutationObserver",
 	"type": "module",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
@@ -30,9 +30,9 @@
 		"dom",
 		"mutation",
 		"observer",
-		"watch",
+		"detect",
 		"elements",
-		"arrive",
+		"detector",
 		"mutation-observer",
 		"typescript"
 	],
@@ -40,7 +40,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/febalist/arrive.git"
+		"url": "git+https://github.com/febalist/element-detector.git"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.0",

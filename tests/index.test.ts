@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { arrive } from "../src/index";
+import { detect } from "../src/index";
 
-describe("arrive", () => {
+describe("detect", () => {
 	beforeEach(() => {
 		document.body.innerHTML = "";
 	});
@@ -12,7 +12,7 @@ describe("arrive", () => {
 
 	it("should detect new elements added to DOM", async () => {
 		const callback = vi.fn();
-		arrive("button.test", callback);
+		detect("button.test", callback);
 
 		const button = document.createElement("button");
 		button.className = "test";
@@ -28,7 +28,7 @@ describe("arrive", () => {
 		document.body.appendChild(button);
 
 		const callback = vi.fn();
-		arrive("button.test", callback, { existing: true });
+		detect("button.test", callback, { existing: true });
 
 		expect(callback).toHaveBeenCalledWith(button);
 	});
@@ -39,14 +39,14 @@ describe("arrive", () => {
 		document.body.appendChild(button);
 
 		const callback = vi.fn();
-		arrive("button.test", callback);
+		detect("button.test", callback);
 
 		expect(callback).not.toHaveBeenCalled();
 	});
 
 	it("should filter elements using filter option", async () => {
 		const callback = vi.fn();
-		arrive<HTMLAnchorElement>("a", callback, {
+		detect<HTMLAnchorElement>("a", callback, {
 			filter: (link) => link.href.includes("example.com"),
 		});
 
@@ -65,7 +65,7 @@ describe("arrive", () => {
 
 	it("should stop after first element with once option", async () => {
 		const callback = vi.fn();
-		const watcher = arrive("button.test", callback, { once: true });
+		const detector = detect("button.test", callback, { once: true });
 
 		const button1 = document.createElement("button");
 		button1.className = "test";
@@ -81,12 +81,12 @@ describe("arrive", () => {
 
 		expect(callback).toHaveBeenCalledTimes(1);
 		expect(callback).toHaveBeenCalledWith(button1);
-		expect(watcher.signal.aborted).toBe(true);
+		expect(detector.signal.aborted).toBe(true);
 	});
 
 	it("should stop watching when stop() is called", async () => {
 		const callback = vi.fn();
-		const watcher = arrive("button.test", callback);
+		const detector = detect("button.test", callback);
 
 		const button1 = document.createElement("button");
 		button1.className = "test";
@@ -95,7 +95,7 @@ describe("arrive", () => {
 		await new Promise((resolve) => setTimeout(resolve, 50));
 		expect(callback).toHaveBeenCalledTimes(1);
 
-		watcher.stop();
+		detector.stop();
 
 		const button2 = document.createElement("button");
 		button2.className = "test";
@@ -103,16 +103,16 @@ describe("arrive", () => {
 
 		await new Promise((resolve) => setTimeout(resolve, 50));
 		expect(callback).toHaveBeenCalledTimes(1);
-		expect(watcher.signal.aborted).toBe(true);
+		expect(detector.signal.aborted).toBe(true);
 	});
 
 	it("should stop watching on timeout", async () => {
 		const callback = vi.fn();
-		const watcher = arrive("button.test", callback, { timeout: 100 });
+		const detector = detect("button.test", callback, { timeout: 100 });
 
 		await new Promise((resolve) => setTimeout(resolve, 150));
 
-		expect(watcher.signal.aborted).toBe(true);
+		expect(detector.signal.aborted).toBe(true);
 
 		const button = document.createElement("button");
 		button.className = "test";
@@ -125,7 +125,7 @@ describe("arrive", () => {
 	it("should respect external AbortSignal", async () => {
 		const callback = vi.fn();
 		const controller = new AbortController();
-		arrive("button.test", callback, { signal: controller.signal });
+		detect("button.test", callback, { signal: controller.signal });
 
 		controller.abort();
 
@@ -140,7 +140,7 @@ describe("arrive", () => {
 	it("should combine external signal with timeout", async () => {
 		const callback = vi.fn();
 		const controller = new AbortController();
-		const watcher = arrive("button.test", callback, {
+		const detector = detect("button.test", callback, {
 			signal: controller.signal,
 			timeout: 1000,
 		});
@@ -148,7 +148,7 @@ describe("arrive", () => {
 		controller.abort();
 
 		await new Promise((resolve) => setTimeout(resolve, 50));
-		expect(watcher.signal.aborted).toBe(true);
+		expect(detector.signal.aborted).toBe(true);
 	});
 
 	it("should return promise when no callback provided", async () => {
@@ -158,7 +158,7 @@ describe("arrive", () => {
 			document.body.appendChild(button);
 		}, 50);
 
-		const element = await arrive<HTMLButtonElement>("button.test");
+		const element = await detect<HTMLButtonElement>("button.test");
 		expect(element).toBeInstanceOf(HTMLButtonElement);
 		expect(element.className).toBe("test");
 	});
@@ -168,7 +168,7 @@ describe("arrive", () => {
 		button.className = "test";
 		document.body.appendChild(button);
 
-		const promise = arrive<HTMLButtonElement>("button.test");
+		const promise = detect<HTMLButtonElement>("button.test");
 
 		// Add a new element after a delay
 		setTimeout(() => {
@@ -187,7 +187,7 @@ describe("arrive", () => {
 		button.className = "test";
 		document.body.appendChild(button);
 
-		const element = await arrive<HTMLButtonElement>("button.test", {
+		const element = await detect<HTMLButtonElement>("button.test", {
 			existing: true,
 		});
 		expect(element).toBe(button);
@@ -195,7 +195,7 @@ describe("arrive", () => {
 
 	it("should detect nested elements", async () => {
 		const callback = vi.fn();
-		arrive("button.nested", callback);
+		detect("button.nested", callback);
 
 		const div = document.createElement("div");
 		const button = document.createElement("button");
@@ -208,12 +208,12 @@ describe("arrive", () => {
 	});
 
 	it("should provide correct TypeScript types", () => {
-		arrive<HTMLAnchorElement>("a", (link) => {
+		detect<HTMLAnchorElement>("a", (link) => {
 			// TypeScript should infer link as HTMLAnchorElement
 			expect(typeof link.href).toBe("string");
 		});
 
-		arrive<HTMLImageElement>("img", (img) => {
+		detect<HTMLImageElement>("img", (img) => {
 			// TypeScript should infer img as HTMLImageElement
 			expect(typeof img.src).toBe("string");
 		});
@@ -221,7 +221,7 @@ describe("arrive", () => {
 
 	it("should handle multiple elements added at once", async () => {
 		const callback = vi.fn();
-		arrive("button.test", callback);
+		detect("button.test", callback);
 
 		const fragment = document.createDocumentFragment();
 		for (let i = 0; i < 3; i++) {
@@ -237,7 +237,7 @@ describe("arrive", () => {
 
 	it("should work with complex selectors", async () => {
 		const callback = vi.fn();
-		arrive("ul.list li a.link", callback);
+		detect("ul.list li a.link", callback);
 
 		const ul = document.createElement("ul");
 		ul.className = "list";

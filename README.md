@@ -1,13 +1,13 @@
-# @febalist/arrive
+# element-detector
 
-A library for watching elements appear in the DOM. Executes callbacks when elements matching a selector are added to the page.
+A library for detecting elements appearing in the DOM. Executes callbacks when elements matching a selector are added to the page.
 
 Uses [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) to efficiently track DOM changes and notify about new elements. Works at any stage of page lifecycle - during initial load, after DOMContentLoaded, or during dynamic content updates.
 
 ## Installation
 
 ```bash
-npm install @febalist/arrive
+npm install element-detector
 ```
 
 ## Usage
@@ -15,10 +15,10 @@ npm install @febalist/arrive
 ### With callback
 
 ```typescript
-import {arrive} from '@febalist/arrive';
+import {detect} from 'element-detector';
 
 // Called for each new element matching the selector
-arrive('.notification', (element) => {
+detect('.notification', (element) => {
   console.log('New notification:', element);
 });
 ```
@@ -26,16 +26,16 @@ arrive('.notification', (element) => {
 ### Without callback (Promise)
 
 ```typescript
-import {arrive} from '@febalist/arrive';
+import {detect} from 'element-detector';
 
 // Returns a promise that resolves with the first matching element
-const modal = await arrive('.modal');
+const modal = await detect('.modal');
 console.log('Modal appeared:', modal);
 ```
 
 ## API
 
-### `arrive(selector, callback?, options?)`
+### `detect(selector, callback?, options?)`
 
 #### Parameters
 
@@ -48,33 +48,33 @@ console.log('Modal appeared:', modal);
 - Function called for each matching element
 - If omitted, returns a Promise
 
-**options**: `ArriveOptions<T>` (optional)
+**options**: `DetectOptions<T>` (optional)
 
 - Configuration object
 
 #### Returns
 
-- `ArriveWatcher` - when callback is provided
+- `Detector` - when callback is provided
 - `Promise<T>` - when callback is omitted (defaults to `{ once: true }`)
 
 ### Options
 
 **existing**: `boolean` (default: `false`)
 
-- When `true`, processes elements that already exist in the DOM at the time `arrive` is called
+- When `true`, processes elements that already exist in the DOM at the time `detect` is called
 - When `false`, only processes elements added after the call
 
 ```typescript
-arrive('.item', callback, {existing: true});
+detect('.item', callback, {existing: true});
 ```
 
 **once**: `boolean` (default: `false`)
 
 - When `true`, stops watching after the first matching element
-- Automatically calls `stop()` on the watcher
+- Automatically calls `stop()` on the detector
 
 ```typescript
-arrive('.dialog', callback, {once: true});
+detect('.dialog', callback, {once: true});
 ```
 
 **filter**: `(element: T) => boolean`
@@ -83,7 +83,7 @@ arrive('.dialog', callback, {once: true});
 - Only elements for which the function returns `true` will trigger the callback
 
 ```typescript
-arrive('a', callback, {
+detect('a', callback, {
   filter: (link) => link.hostname !== window.location.hostname
 });
 ```
@@ -94,7 +94,7 @@ arrive('a', callback, {
 - Creates an internal AbortController that triggers after the specified time
 
 ```typescript
-arrive('.widget', callback, {timeout: 5000});
+detect('.widget', callback, {timeout: 5000});
 ```
 
 **signal**: `AbortSignal`
@@ -104,7 +104,7 @@ arrive('.widget', callback, {timeout: 5000});
 
 ```typescript
 const controller = new AbortController();
-arrive('.element', callback, {signal: controller.signal});
+detect('.element', callback, {signal: controller.signal});
 
 // Later
 controller.abort();
@@ -115,21 +115,21 @@ controller.abort();
 Specify element type for proper typing:
 
 ```typescript
-arrive<HTMLButtonElement>('.submit', (button) => {
+detect<HTMLButtonElement>('.submit', (button) => {
   button.disabled = false;
 });
 
-arrive<HTMLAnchorElement>('a', (link) => {
+detect<HTMLAnchorElement>('a', (link) => {
   console.log(link.href);
 });
 
-const img = await arrive<HTMLImageElement>('img.hero');
+const img = await detect<HTMLImageElement>('img.hero');
 ```
 
 ### Interfaces
 
 ```typescript
-interface ArriveOptions<T extends Element = Element> {
+interface DetectOptions<T extends Element = Element> {
   existing?: boolean;
   filter?: (element: T) => boolean;
   once?: boolean;
@@ -137,7 +137,7 @@ interface ArriveOptions<T extends Element = Element> {
   signal?: AbortSignal;
 }
 
-interface ArriveWatcher {
+interface Detector {
   signal: AbortSignal;  // Fires when watching stops
   stop: () => void;     // Manually stop watching
 }
@@ -148,7 +148,7 @@ interface ArriveWatcher {
 ### Initializing widgets
 
 ```typescript
-arrive('.date-picker', (element) => {
+detect('.date-picker', (element) => {
   new DatePicker(element);
 }, {existing: true});
 ```
@@ -156,7 +156,7 @@ arrive('.date-picker', (element) => {
 ### Waiting for dynamic content
 
 ```typescript
-const item = await arrive('.product[data-id="12345"]', {
+const item = await detect('.product[data-id="12345"]', {
   timeout: 10000
 });
 
@@ -166,7 +166,7 @@ item.scrollIntoView();
 ### Modal dialogs
 
 ```typescript
-arrive('.modal.confirmation', (modal) => {
+detect('.modal.confirmation', (modal) => {
   const confirmBtn = modal.querySelector('.confirm');
   confirmBtn?.addEventListener('click', handleConfirm);
 });
@@ -175,7 +175,7 @@ arrive('.modal.confirmation', (modal) => {
 ### Processing external links
 
 ```typescript
-arrive('a', (link) => {
+detect('a', (link) => {
   link.setAttribute('target', '_blank');
   link.setAttribute('rel', 'noopener noreferrer');
 }, {
@@ -187,11 +187,11 @@ arrive('a', (link) => {
 ### Timeout with fallback
 
 ```typescript
-const watcher = arrive('.slow-widget', (widget) => {
+const detector = detect('.slow-widget', (widget) => {
   initialize(widget);
 }, {timeout: 5000});
 
-watcher.signal.addEventListener('abort', () => {
+detector.signal.addEventListener('abort', () => {
   showFallback();
 });
 ```
@@ -201,7 +201,7 @@ watcher.signal.addEventListener('abort', () => {
 ```typescript
 const controller = new AbortController();
 
-arrive('.live-update', (update) => {
+detect('.live-update', (update) => {
   processUpdate(update);
 }, {signal: controller.signal});
 
@@ -216,19 +216,19 @@ document.addEventListener('navigate', () => {
 ```typescript
 const controller = new AbortController();
 
-const watcher = arrive('.element', callback, {
+const detector = detect('.element', callback, {
   signal: controller.signal,
   timeout: 10000
 });
 
 // Stops when either timeout is reached OR controller.abort() is called
-// watcher.signal combines both signals
+// detector.signal combines both signals
 ```
 
 ### Waiting for third-party scripts
 
 ```typescript
-const widget = await arrive('.third-party-widget', {
+const widget = await detect('.third-party-widget', {
   timeout: 5000,
   existing: true
 });

@@ -1,9 +1,9 @@
 /**
- * Options for configuring the arrive watcher
+ * Options for configuring the detector
  */
-export interface ArriveOptions<T extends Element = Element> {
+export interface DetectOptions<T extends Element = Element> {
 	/**
-	 * Process existing elements that match the selector when arrive is called
+	 * Process existing elements that match the selector when detect is called
 	 * @default false
 	 */
 	existing?: boolean;
@@ -31,9 +31,9 @@ export interface ArriveOptions<T extends Element = Element> {
 }
 
 /**
- * Watcher object returned by arrive
+ * Detector object returned by detect
  */
-export interface ArriveWatcher {
+export interface Detector {
 	/**
 	 * AbortSignal that fires when watching stops
 	 */
@@ -46,39 +46,39 @@ export interface ArriveWatcher {
 }
 
 // Function overloads
-export function arrive<T extends Element = Element>(
+export function detect<T extends Element = Element>(
 	selector: string,
 	callback: (element: T) => void,
-	options?: ArriveOptions<T>,
-): ArriveWatcher;
+	options?: DetectOptions<T>,
+): Detector;
 
-export function arrive<T extends Element = Element>(
+export function detect<T extends Element = Element>(
 	selector: string,
-	options?: Omit<ArriveOptions<T>, "once">,
+	options?: Omit<DetectOptions<T>, "once">,
 ): Promise<T>;
 
 /**
- * Watch for elements matching a selector to appear in the DOM
+ * Detect elements matching a selector appearing in the DOM
  */
-export function arrive<T extends Element = Element>(
+export function detect<T extends Element = Element>(
 	selector: string,
-	callbackOrOptions?: ((element: T) => void) | Omit<ArriveOptions<T>, "once">,
-	optionsParam?: ArriveOptions<T>,
-): ArriveWatcher | Promise<T> {
+	callbackOrOptions?: ((element: T) => void) | Omit<DetectOptions<T>, "once">,
+	optionsParam?: DetectOptions<T>,
+): Detector | Promise<T> {
 	// Determine if callback was provided
 	const hasCallback = typeof callbackOrOptions === "function";
 	const callback = hasCallback ? callbackOrOptions : undefined;
 	const options = hasCallback ? optionsParam : callbackOrOptions;
 
 	// For Promise API, set defaults
-	const finalOptions: ArriveOptions<T> = hasCallback
+	const finalOptions: DetectOptions<T> = hasCallback
 		? { once: false, ...options }
 		: { once: true, ...options };
 
 	// Promise API - no callback provided
 	if (!hasCallback) {
 		return new Promise<T>((resolve, reject) => {
-			const _watcher = arriveImpl<T>(
+			const _detector = detectImpl<T>(
 				selector,
 				(element) => {
 					resolve(element);
@@ -91,7 +91,7 @@ export function arrive<T extends Element = Element>(
 				finalOptions.signal.addEventListener(
 					"abort",
 					() => {
-						reject(new Error("Arrive aborted"));
+						reject(new Error("Detection aborted"));
 					},
 					{ once: true },
 				);
@@ -100,7 +100,7 @@ export function arrive<T extends Element = Element>(
 	}
 
 	// Callback API
-	return arriveImpl<T>(
+	return detectImpl<T>(
 		selector,
 		callback as (element: T) => void,
 		finalOptions,
@@ -132,13 +132,13 @@ function combineAbortSignals(signals: AbortSignal[]): AbortSignal {
 }
 
 /**
- * Internal implementation of arrive
+ * Internal implementation of detect
  */
-function arriveImpl<T extends Element = Element>(
+function detectImpl<T extends Element = Element>(
 	selector: string,
 	callback: (element: T) => void,
-	options: ArriveOptions<T> = {},
-): ArriveWatcher {
+	options: DetectOptions<T> = {},
+): Detector {
 	const {
 		existing = false,
 		filter,
