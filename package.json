@@ -21,8 +21,7 @@
     "test:watch": "vitest",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "check": "npm run lint && npm run build && npm test",
-    "prepublishOnly": "npm run check"
+    "check": "npm run lint && npm run build && npm test"
   },
   "keywords": [
     "dom",
@@ -42,8 +41,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@types/node": "^20.0.0",
     "jsdom": "^23.0.0",
+    "semantic-release": "^25.0.1",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0"
