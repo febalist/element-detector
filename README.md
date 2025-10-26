@@ -238,9 +238,11 @@ initializeIntegration(widget);
 
 ## Browser Support
 
+[Check browser compatibility](https://caniuse.com/mutationobserver,abortcontroller,mdn-api_abortsignal_any_static,promises)
+
 Requires:
 
-- [MutationObserver](https://caniuse.com/mutationobserver)
-- [AbortController](https://caniuse.com/abortcontroller)
-- [AbortSignal.any()](https://caniuse.com/mdn-api_abortsignal_any_static)
-- [Promises](https://caniuse.com/promises)
+- [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver)
+- [AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)
+- [AbortSignal.any()](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/any_static)
+- [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
